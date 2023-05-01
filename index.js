@@ -220,7 +220,18 @@ client.on("guildMemberAdd", (member) => {
     member.guild.channels.cache.get("1073493664799658029").send(`Hi <@${member.id}>. Welcome to uncle tetsu discord server! Check out our ${member.guild.channels.cache.get("1073493664799658025").toString()} and ${member.guild.channels.cache.get("1073496059701112873").toString()} to see some important instructions`)
 })
 
+
+
 client.on('messageCreate', async message => {
+
+    if (message.channelId === '1077280880055304333') {
+        if (message.attachments.size > 0) {
+            if (message.attachments.every(attachIsImage)) {
+                const emojis = ['👍', '🤝', '🙌', '👌', '👏'];
+                await message.react(emojis[Math.floor(Math.random() * emojis.length)])
+            }
+        }
+    }
 
     if (message.content.includes('<@1077614044342653061>')) {
         message.reply(`Hi theree! ${message.author}`)
@@ -600,6 +611,13 @@ const main = {
     }
 
 
+}
+
+function attachIsImage(msgAttach) {
+    var url = msgAttach.url;
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'svg'];
+    const extension = url.split('.').pop().toLowerCase();
+    return imageExtensions.includes(extension);
 }
 
 
