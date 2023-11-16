@@ -7,6 +7,17 @@ const cheesecakeVal = [
 ]
 
 
+const lateGif = [
+    "https://media.giphy.com/media/QJNWs8UMXTQNvtdurq/giphy.gif",
+    "https://media.giphy.com/media/7SIdExk63rTPXhbbbt/giphy.gif",
+    "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYjJoOWRtOTBoMDlmNGozMjZtemswNHBsb2x2dDhqeWlqbnlja3g5bCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/M6tzlOPM4iQXXk5FBu/giphy.gif",
+    "https://media.giphy.com/media/mdfPpglf2c0QxED151/giphy.gif",
+    "https://media.giphy.com/media/brHaCdJqCXijm/giphy.gif",
+    "https://media.giphy.com/media/2tOsjtp4xFgD6pc48U/giphy.gif"
+
+]
+
+
 //JSON file found in github. If this is yours, please contact me
 const motivationalQuote = [
     {
@@ -1558,4 +1569,4 @@ const motivationalQuote = [
     }
 ]
 
-module.exports = { cheesecakeVal, motivationalQuote }
+module.exports = { cheesecakeVal, motivationalQuote, lateGif }

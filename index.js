@@ -5,10 +5,10 @@ const express = require('express');
 
 //Version 1.5
 
+const CronJob = require('cron').CronJob;
 
-
-const { cheesecakeVal, motivationalQuote } = require('../uncletetsuottawa/model/model.js')
-const { TEST_COMMAND, CALCULATE, ADD_TODO, REM_TODO, PREP_PLAN, PREP_UPDATE } = require('../uncletetsuottawa/commands/commands.js');
+const { cheesecakeVal, motivationalQuote, lateGif } = require('./model/model.js')
+const { TEST_COMMAND, CALCULATE, ADD_TODO, REM_TODO, PREP_PLAN, PREP_UPDATE } = require('./commands/commands.js')
 const { InteractionType, InteractionResponseType, InteractionResponseFlags, MessageComponentTypes, ButtonStyleTypes } = require('discord-interactions');
 const { Client, GatewayIntentBits, REST, Routes, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 
@@ -100,6 +100,12 @@ let prepEmbed = new EmbedBuilder()
     .setDescription('Here are the list of todos')
     .setTimestamp()
     .setFooter({ text: `Updated since` });
+
+
+let reminderLayout = new EmbedBuilder()
+    .setColor(0xff7700)
+    .setTimestamp()
+    .setFooter({ text: `Sent` });
 
 function createRow(style) {
     const row = new ActionRowBuilder()
@@ -214,6 +220,19 @@ function showButton(interaction, collector) {
 
 client.on('ready', () => {
     console.log(`${client.user.tag} has logged in!`)
+
+    //Send a message reminder 
+    /**
+     * 19 12 * * 3
+     * 
+     * 19 12 = 12:19PM 
+     * 3 = Wednesday
+     */
+    // const job = new CronJob('19 12 * * 3', () => {
+    //     sendReminder();
+    // }, null, true, 'America/Toronto');
+    // job.start();
+
 })
 
 client.on("guildMemberAdd", (member) => {
@@ -223,21 +242,61 @@ client.on("guildMemberAdd", (member) => {
 
 
 client.on('messageCreate', async message => {
+    const emojis = ['👍', '🤝', '🙌', '👌', '👏', '🥳'];
+
+
+
+
 
     if (message.channelId === '1077280880055304333') {
+        console.log(message.attachments.size > 0)
         if (message.attachments.size > 0) {
-            if (message.attachments.every(attachIsImage)) {
-                const emojis = ['👍', '🤝', '🙌', '👌', '👏'];
+
+            if (attachIsImage) {
                 await message.react(emojis[Math.floor(Math.random() * emojis.length)])
             }
         }
     }
+
+
+    if (message.channelId === '1102988594148286604') {
+
+        if (message.attachments.size > 0) {
+            if (attachIsImage) {
+                const reactions = ['1105199890193186906', emojis];
+                await message.react(reactions[Math.floor(Math.random() * reactions.length)])
+            }
+
+        }
+    }
+
+
+    if (message.channelId === '1077281240564121641') {
+        if (message.attachments.size > 0) {
+            if (attachIsImage) {
+                const reactions = ['1107724715033886780', emojis];
+                await message.react(reactions[Math.floor(Math.random() * reactions.length)])
+            }
+        }
+    }
+
 
     if (message.content.includes('<@1077614044342653061>')) {
         message.reply(`Hi theree! ${message.author}`)
 
     }
 
+
+    /**
+     * Send a GIF regarding late notice
+     * 
+     * ID - Represent the channel ID
+     */
+    if (message.channelId === "1073493664799658030") {
+        if (message.content.toLocaleLowerCase().includes("late")) {
+            message.reply(lateGif[Math.floor(Math.random() * lateGif.length)])
+        }
+    }
 
     if (message.content.toLocaleLowerCase() == 'quote') {
         message.reply(motivationalQuote[Math.floor(Math.random() * motivationalQuote.length - 1)].quote.toString())
@@ -248,7 +307,6 @@ client.on('messageCreate', async message => {
             message.channel.bulkDelete(messages)
         })
     }
-
 
     if (message.content.toLocaleLowerCase() === 'help') {
         helpEmbed.spliceFields(0, 25)
@@ -301,6 +359,16 @@ client.on('messageCreate', async message => {
         exampleEmbed.addFields({ name: '\u200B', value: '\u200B' })
         message.channel.send({ embeds: [exampleEmbed] })
     }
+
+
+
+
+    /**
+     * Message reminder weekly
+     */
+
+
+
 })
 
 
@@ -619,6 +687,21 @@ function attachIsImage(msgAttach) {
     const extension = url.split('.').pop().toLowerCase();
     return imageExtensions.includes(extension);
 }
+
+
+/**
+ * Send a weekly reminder
+//  */
+// const sendReminder = () => {
+//     client.channels.fetch('1077615880487313490').then((channel) => {
+//         reminderLayout.setTitle("Weekly reminder")
+//         reminderLayout.setDescription(`Order description`)
+//         reminderLayout.addFields({ name: '\u200B', value: '\u200B' })
+//         channel.send({ content: "Hello <@&1174392988303110155>", embeds: [reminderLayout] })
+//     })
+// }
+
+
 
 
 
