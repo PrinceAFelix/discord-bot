@@ -1,7 +1,8 @@
 require('dotenv/config');
+
 const shortid = require('shortid');
 const express = require('express');
-
+const nlp = require('compromise');
 
 //Version 1.5
 
@@ -104,8 +105,7 @@ let prepEmbed = new EmbedBuilder()
 
 let reminderLayout = new EmbedBuilder()
     .setColor(0xff7700)
-    .setTimestamp()
-    .setFooter({ text: `Sent` });
+    .setFooter({ text: `Cheesecake` });
 
 function createRow(style) {
     const row = new ActionRowBuilder()
@@ -221,6 +221,35 @@ function showButton(interaction, collector) {
 client.on('ready', () => {
     console.log(`${client.user.tag} has logged in!`)
 
+
+    /**
+     * Job1 = Agropur - Milk And Butter
+     * Due: Mondays 2:30PM
+     */
+
+    /**
+    * Job2 = Agropur - Milk And Butter
+    * Due: Thursdays 2:30PM
+    */
+
+    /**
+    * Job3 = Farines - Cheese, yolk, sugar, etc.
+    * Due: Tuesdays 2PM
+    */
+
+    /**
+     * Job4 = Costco - EggWhite and Honey
+     * Tuesdays
+     */
+
+    /**
+     * Job5 = Request tart cups number
+     * Mondays
+     */
+
+
+
+
     //Send a message reminder 
     /**
      * 19 12 * * 3
@@ -228,10 +257,29 @@ client.on('ready', () => {
      * 19 12 = 12:19PM 
      * 3 = Wednesday
      */
-    // const job = new CronJob('19 12 * * 3', () => {
-    //     sendReminder();
-    // }, null, true, 'America/Toronto');
-    // job.start();
+    const job1 = new CronJob('0 10 * * 1,2,4', () => {
+        const today = new Date();
+        const dayOfWeek = today.getDay();
+
+        switch (dayOfWeek) {
+            case 1:
+                sendReminder("job1");
+                break;
+            case 2:
+                sendReminder("job2");
+                break;
+            case 4:
+                sendReminder("job3");
+                break;
+            default:
+                break
+        }
+    }, null, true, 'America/New_York');
+
+
+
+    job1.start();
+
 
 })
 
@@ -242,10 +290,7 @@ client.on("guildMemberAdd", (member) => {
 
 
 client.on('messageCreate', async message => {
-    const emojis = ['👍', '🤝', '🙌', '👌', '👏', '🥳'];
-
-
-
+    let emojis = ['👍', '🤝', '🙌', '👌', '👏', '🥳'];
 
 
     if (message.channelId === '1077280880055304333') {
@@ -263,8 +308,8 @@ client.on('messageCreate', async message => {
 
         if (message.attachments.size > 0) {
             if (attachIsImage) {
-                const reactions = ['1105199890193186906', emojis];
-                await message.react(reactions[Math.floor(Math.random() * reactions.length)])
+                emojis = ['1105199890193186906'].concat(emojis);
+                await message.react(emojis[Math.floor(Math.random() * emojis.length)])
             }
 
         }
@@ -274,8 +319,8 @@ client.on('messageCreate', async message => {
     if (message.channelId === '1077281240564121641') {
         if (message.attachments.size > 0) {
             if (attachIsImage) {
-                const reactions = ['1107724715033886780', emojis];
-                await message.react(reactions[Math.floor(Math.random() * reactions.length)])
+                emojis = ['1107724715033886780'].concat(emojis);
+                await message.react(emojis[Math.floor(Math.random() * emojis.length)])
             }
         }
     }
@@ -292,11 +337,11 @@ client.on('messageCreate', async message => {
      * 
      * ID - Represent the channel ID
      */
-    if (message.channelId === "1073493664799658030") {
-        if (message.content.toLocaleLowerCase().includes("late")) {
-            message.reply(lateGif[Math.floor(Math.random() * lateGif.length)])
-        }
-    }
+    // if (message.channelId === "1073493664799658030") {
+    //     if (isLateMessage(message.content.toLocaleLowerCase())) {
+    //         message.reply(lateGif[Math.floor(Math.random() * lateGif.length)])
+    //     }
+    // }
 
     if (message.content.toLocaleLowerCase() == 'quote') {
         message.reply(motivationalQuote[Math.floor(Math.random() * motivationalQuote.length - 1)].quote.toString())
@@ -386,10 +431,7 @@ client.on('interactionCreate', async interaction => {
     if (!interaction.isChatInputCommand()) return;
 
     if (interaction.commandName === 'test') {
-
-
         await interaction.reply('Test working')
-
     }
 
     //Calculator
@@ -681,6 +723,30 @@ const main = {
 
 }
 
+
+function isLateMessage(sentence) {
+    const doc = nlp(sentence);
+
+    const keyWords = [
+        'be late', 'be there', 'run late', 'delayed', 'running behind', 'behind schedule', 'tardy', 'late', 'overdue', 'behind time',
+        'not on time', 'not punctual', 'not arriving on time', 'not making it on time', 'not meeting the deadline',
+        'right now', 'on my way', 'omw', 'almost there', 'arriving shortly', 'en route'
+    ];
+
+    // Check for keywords indicating either lateness or imminent arrival
+    if (keyWords.some(keyword => sentence.toLowerCase().includes(keyword))) {
+        return true;
+    }
+
+    // Check for phrases indicating an estimated arrival time
+    const estimatedTime = doc.match('#Value #Duration');
+    if (estimatedTime.found) {
+        return true;
+    }
+
+    return false;
+}
+
 function attachIsImage(msgAttach) {
     var url = msgAttach.url;
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'svg'];
@@ -691,15 +757,81 @@ function attachIsImage(msgAttach) {
 
 /**
  * Send a weekly reminder
-//  */
-// const sendReminder = () => {
-//     client.channels.fetch('1077615880487313490').then((channel) => {
-//         reminderLayout.setTitle("Weekly reminder")
-//         reminderLayout.setDescription(`Order description`)
-//         reminderLayout.addFields({ name: '\u200B', value: '\u200B' })
-//         channel.send({ content: "Hello <@&1174392988303110155>", embeds: [reminderLayout] })
-//     })
-// }
+ */
+
+/**
+ * Job1 = Agropur - Milk And Butter
+ * Due: Mondays 2:30PM
+ */
+
+/**
+* Job2 = Agropur - Milk And Butter
+* Due: Thursdays 2:30PM
+*/
+
+/**
+* Job3 = Farines - Cheese, yolk, sugar, etc.
+* Due: Tuesdays 2PM
+*/
+
+/**
+ * Job4 = Costco - EggWhite and Honey
+ * Tuesdays
+ */
+
+/**
+ * Job5 = Request tart cups number
+ * Mondays
+ */
+const sendReminder = (job) => {
+
+    let day = ''
+    let msgTitle = []
+    let msgValue = []
+
+    switch (job) {
+        case 'job1':
+            day = "Monday"
+            msgTitle.push("Agropur: Milk and Butter")
+            msgTitle.push("Montreal Request: Tart Cups")
+            msgValue.push("Order Before 2:30PM")
+            msgValue.push("Send Request by the end of Today")
+            break;
+        case 'job2':
+            day = "Tuesday"
+            msgTitle.push("Farinex: Cheese, Yolk, Sugar, and more...")
+            msgTitle.push("Costco: Egg Whites and Honey")
+            msgValue.push("Order Before 2:00PM")
+            msgValue.push("Reminder to Order")
+            break;
+        case 'job3':
+            day = "Thursday"
+            msgTitle.push("Agropur: Milk and Butter")
+            msgTitle.push("Agropur: Tart Cheese")
+            msgValue.push("Order Before 2:30PM")
+            msgValue.push("Order Before 2:00PM")
+            break;
+        default:
+            break;
+    }
+
+
+    reminderLayout.spliceFields(0, 25)
+
+
+    client.channels.fetch('1073511379765567528').then((channel) => {
+
+        reminderLayout.setTitle(day + " reminder")
+        reminderLayout.addFields({ name: '\u200B', value: ' ' })
+
+        msgTitle.forEach((val, i) => {
+            reminderLayout.addFields({ name: `${val}`, value: `${msgValue[i]}` })
+            reminderLayout.addFields({ name: '\u200B', value: ' ' })
+        })
+
+        channel.send({ content: "Good Morning <@&1096137274770587658>", embeds: [reminderLayout] })
+    })
+}
 
 
 
